@@ -53,7 +53,7 @@ export default {
       const store = useTokenStore();
       const user = userStorage();
 
-      const baseUrl = "https://mychessdeploy.onrender.com/api/v1";
+      const baseUrl = "http://" + import.meta.env.VITE_API_URL + "/api/v1";
       try {
         const response = await fetch(baseUrl + "/mytokenlogin/", {
           method: "POST",

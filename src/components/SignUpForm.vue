@@ -83,19 +83,19 @@ export default {
         emtyMail.value = false;
 
         axios
-          .post("http://192.168.1.58:8000/api/v1/users/", {
+          .post("http://" + import.meta.env.VITE_API_URL + "/api/v1/users/", {
             username: user.value.email,
             password: user.value.password,
             email: user.value.email,
           })
           .then((response) => {
             // Manejar la respuesta de la API si es necesario
-            console.log("Respuesta de la API:", response.data);
+            console.log("Respuesta de la API:" + response.data);
             router.push("/log-in");
           })
           .catch((error) => {
             // Manejar errores de la solicitud
-            console.error("Error al hacer la solicitud POST:", error);
+            console.log("Error al hacer la solicitud POST:" + error);
           });
       } else {
         passwordsMismatch.value = true;
@@ -114,7 +114,9 @@ export default {
 
   mounted() {
     const socketUrl =
-      "ws://192.168.1.58:8000/ws/play/2/?aca00c66b5d74a2c7eeb7d35da62879e77bf7a53";
+      "ws://" +
+      import.meta.env.API_URL +
+      "/ws/play/2/?aca00c66b5d74a2c7eeb7d35da62879e77bf7a53";
 
     // Crear una instancia de WebSocket
     this.socket = new WebSocket(socketUrl);

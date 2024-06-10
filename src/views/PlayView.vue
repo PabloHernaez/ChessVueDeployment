@@ -2,8 +2,8 @@
 import { onMounted, reactive, ref } from "vue";
 import { TheChessboard } from "vue3-chessboard";
 import "vue3-chessboard/style.css";
-import { useTokenStore } from "../stores/token";
-import { userStorage } from "../stores/userInfo";
+import { useTokenStore } from "../stores/token.js";
+import { userStorage } from "../stores/userInfo.js";
 
 const user = userStorage();
 const token = useTokenStore();
@@ -11,7 +11,8 @@ const token = useTokenStore();
 const gameid = token.gameId;
 const authToken = token.token;
 
-const playerColor = user.playerColor;
+const playercolor = user.userColor;
+const player = user.userId;
 
 //const user = userStorage();
 const blackMoves = ref([]);
@@ -20,11 +21,18 @@ const whiteMoves = ref([]);
 
 const boardConfig = reactive({
   coordinates: true,
-  orientation: playerColor,
+  orientation: playercolor,
   trustAllEvents: true,
+  viewOnly: true,
 });
 
-const socketURL = "ws://192.168.1.58:8000/ws/play/" + gameid + "/?" + authToken;
+const socketURL =
+  "ws://" +
+  import.meta.env.VITE_API_URL +
+  "/ws/play/" +
+  gameid +
+  "/?" +
+  authToken;
 
 const socket = new WebSocket(socketURL);
 
@@ -37,7 +45,7 @@ onMounted(() => {
     console.log("Conexión WebSocket establecida");
   };
 
-  socket.onmessage = () => {
+  socket.onmessage = (event) => {
     const data = JSON.parse(event.data);
 
     if (data.type === "move") {
@@ -46,9 +54,15 @@ onMounted(() => {
         to: data.to,
         promotion: data.promotion,
       });
-      boardConfig.viewOnly = false;
+
+      if (data.playerID !== player) {
+        boardConfig.viewOnly = false;
+      }
     } else if (data.type === "game") {
       boardAPI?.setPosition(data.board_status);
+      if (data.status === "ACTIVE" && playercolor === "white") {
+        boardConfig.viewOnly = false;
+      }
     }
     console.log(data);
   };
@@ -63,13 +77,14 @@ const handleMove = (moveData) => {
     blackMoves.value.push(move.piece + "->" + move.lan);
   }
 
-  if (move.promotion === "null") {
+  if ("promotion" in move) {
     socket.send(
       JSON.stringify({
         type: "move",
         from: move.from,
         to: move.to,
         playerID: user.userId,
+        promotion: move.promotion,
       })
     );
   } else {
@@ -79,7 +94,6 @@ const handleMove = (moveData) => {
         from: move.from,
         to: move.to,
         playerID: user.userId,
-        promotion: move.promotion,
       })
     );
   }
@@ -107,6 +121,7 @@ const handleMove = (moveData) => {
     </div>
     <TheChessboard
       :board-config="boardConfig"
+      reactive-config
       @move="handleMove"
       :player-color="playerColor"
       @board-created="(api) => (boardAPI = api)" />

@@ -17,7 +17,7 @@ export default {
 
   setup() {
     const logOut = async () => {
-      const serverUrl = "https://mychessdeploy.onrender.com/";
+      const serverUrl = "http://" + import.meta.env.API_URL + "/";
       const store = useTokenStore();
       try {
         // Lógica de logout

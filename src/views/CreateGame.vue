@@ -27,8 +27,6 @@ import { useTokenStore } from "../stores/token.js";
 import { userStorage } from "../stores/userInfo.js";
 
 const selected = ref("");
-const gameId = ref("");
-
 const token = useTokenStore();
 const user = userStorage();
 const router = useRouter();
@@ -44,12 +42,12 @@ const join = async () => {
     // Código para unirse a cualquier juego
     console.log("Joining any game...");
 
-    const response = await fetch("http://192.168.1.58:8000/api/v1/games/", {
+    const url = "http://" + import.meta.env.VITE_API_URL + "/api/v1/games/";
+    const response = await fetch(url, {
       method: "POST",
       headers: {
-        Authorization: "Token " + valToken,
+        Authorization: "token " + valToken,
       },
-      body: JSON.stringify({ status: "pending" }),
     });
 
     if (response.status === 201 || response.status === 200) {
